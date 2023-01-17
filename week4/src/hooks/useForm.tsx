@@ -2,14 +2,7 @@ import { AxiosResponse } from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { comment, editState } from '../store/commentSlice';
 import { useAppSelector } from '../store/configStore';
-
-type FormData = {
-  id?: number;
-  profile_url: string;
-  author: string;
-  content: string;
-  createdAt: string;
-};
+import { Comment } from '../types/comment-types';
 
 type FormDataConfig = {
   name: string;
@@ -29,7 +22,7 @@ const useForm = () => {
         createdAt: '',
       };
 
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [formData, setFormData] = useState<Comment>(initialFormData);
 
   const setForm = useCallback((formDataConfig: FormDataConfig): void => {
     const { name, value } = formDataConfig;
@@ -37,7 +30,7 @@ const useForm = () => {
   }, []);
 
   const setSelectedData = useCallback(
-    (formDataConfig: AxiosResponse<FormData, any>): void => {
+    (formDataConfig: AxiosResponse<Comment, any>): void => {
       const { data } = formDataConfig;
       setFormData(data);
     },

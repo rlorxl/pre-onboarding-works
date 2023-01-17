@@ -1,20 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import ApiRequest from '../api/api';
+import { Comment, CommentData } from '../types/comment-types';
 import { RootState } from './configStore';
-
-type Comment = {
-  id?: number;
-  profile_url: string;
-  author: string;
-  content: string;
-  createdAt: string;
-};
-
-type CommentData = {
-  isEditing: boolean;
-  comment: Comment;
-  commentList: Comment[];
-};
 
 export const fetchAllComments = createAsyncThunk(
   'comment/fetchAll',

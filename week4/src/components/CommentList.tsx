@@ -8,14 +8,6 @@ import {
 } from '../store/commentSlice';
 import { useAppDispatch, useAppSelector } from '../store/configStore';
 
-type Comment = {
-  id: number;
-  profile_url: string;
-  author: string;
-  content: string;
-  createdAt: string;
-};
-
 const CommentList = () => {
   const dispatch = useAppDispatch();
   const commentList = useAppSelector(list);
