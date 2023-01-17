@@ -4,14 +4,17 @@ import useForm from '../hooks/useForm';
 import {
   comment,
   createComment,
-  fetchAllComments,
+  fetchPage,
+  page,
   updateComment,
 } from '../store/commentSlice';
 import { useAppDispatch, useAppSelector } from '../store/configStore';
 
 const Form = () => {
   const dispatch = useAppDispatch();
+
   const commentData = useAppSelector(comment);
+  const currentPage = useAppSelector(page);
 
   const { formData, setForm, resetForm } = useForm();
 
@@ -27,14 +30,16 @@ const Form = () => {
     e.preventDefault();
 
     if (!commentData.id) {
+      console.log('first');
       dispatch(createComment(formData));
+      dispatch(fetchPage(1));
     } else {
       dispatch(
         updateComment({ commentId: commentData.id, newComment: formData })
       );
+      dispatch(fetchPage(currentPage));
     }
 
-    dispatch(fetchAllComments(1));
     resetForm();
   };
 

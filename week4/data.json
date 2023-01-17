@@ -1,13 +1,6 @@
 {
   "comments": [
     {
-      "id": 1,
-      "profile_url": "https://picsum.photos/id/1/50/50",
-      "author": "abc_1",
-      "content": "UI 테스트는 어떻게 진행하나요",
-      "createdAt": "2022-03-01"
-    },
-    {
       "id": 2,
       "profile_url": "https://picsum.photos/id/2/50/50",
       "author": "abc_2",
@@ -106,6 +99,34 @@
       "createdAt": "2022-03-15"
     },
     {
+      "id": 16,
+      "profile_url": "https://picsum.photos/id/16/50/50",
+      "author": "abc_16",
+      "content": "Atomic 디자인은 무엇인가요",
+      "createdAt": "2022-03-16"
+    },
+    {
+      "id": 17,
+      "profile_url": "https://picsum.photos/id/18/50/50",
+      "author": "abc_17",
+      "content": "UI 테스트는 어떻게 진행하나요???",
+      "createdAt": "2022-03-17"
+    },
+    {
+      "id": 18,
+      "profile_url": "https://picsum.photos/id/18/50/50",
+      "author": "abc_18",
+      "content": "local storage는 언제 사용하는게 좋나요.",
+      "createdAt": "2022-03-18"
+    },
+    {
+      "id": 19,
+      "profile_url": "https://picsum.photos/id/19/50/50",
+      "author": "abc_19",
+      "content": "막히면 대답은 빨리 해주나요",
+      "createdAt": "2022-03-19"
+    },
+    {
       "id": 21,
       "profile_url": "https://picsum.photos/id/21/50/50",
       "author": "abc_21",
@@ -118,6 +139,13 @@
       "author": "abc_22",
       "content": "주변에 React 개발자 있나요",
       "createdAt": "2022-03-22"
+    },
+    {
+      "profile_url": "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+      "author": "rlorxl",
+      "content": "test2",
+      "createdAt": "2023-01-17",
+      "id": 24
     }
   ]
 }

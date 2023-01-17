@@ -3,12 +3,12 @@ import ApiRequest from '../api/api';
 import { Comment, CommentData } from '../types/comment-types';
 import { RootState } from './configStore';
 
-export const fetchAllComments = createAsyncThunk(
-  'comment/fetchAll',
+export const fetchPage = createAsyncThunk(
+  'comment/fetchPage',
   async (pageNum: number, { rejectWithValue }) => {
     try {
       const response = await ApiRequest.getPage(pageNum);
-      return response.data;
+      return { data: response.data, pageNum };
     } catch (err) {
       return rejectWithValue(err);
     }
@@ -58,7 +58,7 @@ export const deleteComment = createAsyncThunk(
   'comment/delete',
   async (commentId: number, { rejectWithValue }) => {
     try {
-      const response = await ApiRequest.delete(commentId);
+      await ApiRequest.delete(commentId);
       return commentId;
     } catch (err) {
       return rejectWithValue(err);
@@ -68,6 +68,7 @@ export const deleteComment = createAsyncThunk(
 
 const initialCommentState: CommentData = {
   isEditing: false,
+  currentPage: 1,
   comment: {
     profile_url: '',
     author: '',
@@ -82,29 +83,31 @@ export const commentSlice = createSlice({
   initialState: initialCommentState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(fetchAllComments.fulfilled, (state, action) => {
-      state.commentList = action.payload;
+    builder.addCase(fetchPage.fulfilled, (state, action) => {
+      state.commentList = action.payload.data;
+      state.currentPage = action.payload.pageNum;
     });
     builder.addCase(fetchComment.fulfilled, (state, action) => {
       state.comment = action.payload;
-      state.isEditing = !state.isEditing;
+      state.isEditing = true;
     });
     builder.addCase(createComment.fulfilled, (state, action) => {
       state.commentList.push(action.payload);
     });
     builder.addCase(updateComment.fulfilled, (state, action) => {
-      console.log(action.payload);
-      state.isEditing = !state.isEditing;
-    });
-    builder.addCase(deleteComment.fulfilled, (state, action) => {
-      state.commentList = state.commentList.filter(
-        (comment) => comment.id !== action.payload
-      );
+      state.comment = {
+        profile_url: '',
+        author: '',
+        content: '',
+        createdAt: '',
+      };
+      state.isEditing = false;
     });
   },
 });
 
 export const editState = (state: RootState) => state.comment.isEditing;
+export const page = (state: RootState) => state.comment.currentPage;
 export const comment = (state: RootState) => state.comment.comment;
 export const list = (state: RootState) => state.comment.commentList;
 

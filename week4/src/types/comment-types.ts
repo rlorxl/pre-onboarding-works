@@ -8,6 +8,7 @@ export type Comment = {
 
 export type CommentData = {
   isEditing: boolean;
+  currentPage: number;
   comment: Comment;
   commentList: Comment[];
 };

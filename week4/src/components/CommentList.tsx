@@ -2,30 +2,34 @@ import { useEffect } from 'react';
 import styled from 'styled-components';
 import {
   deleteComment,
-  fetchAllComments,
   fetchComment,
+  fetchPage,
   list,
+  page,
 } from '../store/commentSlice';
 import { useAppDispatch, useAppSelector } from '../store/configStore';
 
 const CommentList = () => {
   const dispatch = useAppDispatch();
+
   const commentList = useAppSelector(list);
+  const currentPage = useAppSelector(page);
 
   const deleteCommentHandler = (commentId?: number) => {
     if (commentId === undefined) return;
     dispatch(deleteComment(commentId));
-    dispatch(fetchAllComments(1));
+    dispatch(fetchPage(1));
   };
 
   const updateCommentHandler = async (commentId?: number) => {
     if (commentId === undefined) return;
     dispatch(fetchComment(commentId));
+    dispatch(fetchPage(currentPage));
   };
 
   // TODO: 의존성 배열 문제 해결하기 (commentList가 변할 때 목록을 다시 가져오려고 했는데 무한 리렌더링이 일어나고 shallowEqual을 사용해도 개선되지 않음.)
   useEffect(() => {
-    dispatch(fetchAllComments(1));
+    dispatch(fetchPage(1));
   }, []);
 
   return (

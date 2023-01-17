@@ -1,16 +1,50 @@
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import ApiRequest from '../api/api';
+import { fetchPage, page } from '../store/commentSlice';
+import { useAppDispatch, useAppSelector } from '../store/configStore';
+
+const LIMIT = 4;
 
 const PageList = () => {
-  const pageArray = [];
+  const [pageArray, setPageArray] = useState<number[]>([]);
 
-  pageArray.push(
-    // 임시로 페이지 하나만 설정했습니다.
-    <Page active key='1'>
-      1
-    </Page>
+  const dispatch = useAppDispatch();
+
+  const currentPage = useAppSelector(page);
+
+  const pageNationHandler = (pageNm: number) => {
+    dispatch(fetchPage(pageNm));
+  };
+
+  useEffect(() => {
+    const fetchAllComments = async () => {
+      const response = await ApiRequest.get();
+
+      const pageCount = Math.ceil(response.data.length / LIMIT);
+
+      const newPageArray = Array(pageCount)
+        .fill(0)
+        .map((_, idx) => idx + 1);
+
+      setPageArray(newPageArray);
+    };
+    fetchAllComments();
+  }, []);
+
+  return (
+    <PageListStyle>
+      {pageArray.map((pageNm) => (
+        <Page
+          active={currentPage === pageNm}
+          key={pageNm}
+          onClick={pageNationHandler.bind(null, pageNm)}
+        >
+          {pageNm}
+        </Page>
+      ))}
+    </PageListStyle>
   );
-
-  return <PageListStyle>{pageArray}</PageListStyle>;
 };
 
 const PageListStyle = styled.div`
@@ -24,6 +58,7 @@ const Page = styled.button<{ active: boolean }>`
   font-size: 1rem;
   line-height: 1.5;
   border: 1px solid lightgray;
+  cursor: pointer;
   ${({ active }) =>
     active &&
     `
