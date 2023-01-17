@@ -11,6 +11,7 @@ const CommentList = () => {
   const deleteCommentHandler = (commentId?: number) => {
     if (commentId === undefined) return;
     dispatch(deleteComment(commentId));
+    dispatch(fetchAllComments(1));
   };
 
   const updateCommentHandler = () => {
@@ -19,7 +20,7 @@ const CommentList = () => {
 
   useEffect(() => {
     dispatch(fetchAllComments(1));
-  }, [comments]);
+  }, []);
 
   return (
     <>
