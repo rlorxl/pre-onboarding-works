@@ -1,12 +1,24 @@
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { deleteComment, fetchAllComments, list } from '../store/commentSlice';
-import { useAppDispatch } from '../store/configStore';
+import {
+  deleteComment,
+  fetchAllComments,
+  fetchComment,
+  list,
+} from '../store/commentSlice';
+import { useAppDispatch, useAppSelector } from '../store/configStore';
+
+type Comment = {
+  id: number;
+  profile_url: string;
+  author: string;
+  content: string;
+  createdAt: string;
+};
 
 const CommentList = () => {
   const dispatch = useAppDispatch();
-  const comments = useSelector(list);
+  const commentList = useAppSelector(list);
 
   const deleteCommentHandler = (commentId?: number) => {
     if (commentId === undefined) return;
@@ -14,24 +26,26 @@ const CommentList = () => {
     dispatch(fetchAllComments(1));
   };
 
-  const updateCommentHandler = () => {
-    // update comment
+  const updateCommentHandler = async (commentId?: number) => {
+    if (commentId === undefined) return;
+    dispatch(fetchComment(commentId));
   };
 
+  // TODO: 의존성 배열 문제 해결하기 (commentList가 변할 때 목록을 다시 가져오려고 했는데 무한 리렌더링이 일어나고 shallowEqual을 사용해도 개선되지 않음.)
   useEffect(() => {
     dispatch(fetchAllComments(1));
   }, []);
 
   return (
     <>
-      {comments.map((comment, key) => (
+      {commentList.map((comment, key) => (
         <Comment key={key}>
           <img src={comment.profile_url} alt='' />
           {comment.author}
           <CreatedAt>{comment.createdAt}</CreatedAt>
           <Content>{comment.content}</Content>
           <Button>
-            <a onClick={updateCommentHandler}>수정</a>
+            <a onClick={updateCommentHandler.bind(null, comment.id)}>수정</a>
             <a onClick={deleteCommentHandler.bind(null, comment.id)}>삭제</a>
           </Button>
           <hr />

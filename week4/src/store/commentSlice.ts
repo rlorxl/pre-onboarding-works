@@ -10,13 +10,9 @@ type Comment = {
   createdAt: string;
 };
 
-type Notification = {
-  status: string;
-  message: string;
-};
-
 type CommentData = {
-  notifications: Notification;
+  isEditing: boolean;
+  comment: Comment;
   commentList: Comment[];
 };
 
@@ -25,6 +21,18 @@ export const fetchAllComments = createAsyncThunk(
   async (pageNum: number, { rejectWithValue }) => {
     try {
       const response = await ApiRequest.getPage(pageNum);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  }
+);
+
+export const fetchComment = createAsyncThunk(
+  'comment/fetchComment',
+  async (commentId: number, { rejectWithValue }) => {
+    try {
+      const response = await ApiRequest.getById(commentId);
       return response.data;
     } catch (err) {
       return rejectWithValue(err);
@@ -44,6 +52,21 @@ export const createComment = createAsyncThunk(
   }
 );
 
+export const updateComment = createAsyncThunk(
+  'comment/update',
+  async (
+    { commentId, newComment }: { commentId: number; newComment: Comment },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await ApiRequest.update(commentId, newComment);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  }
+);
+
 export const deleteComment = createAsyncThunk(
   'comment/delete',
   async (commentId: number, { rejectWithValue }) => {
@@ -56,26 +79,13 @@ export const deleteComment = createAsyncThunk(
   }
 );
 
-// export const updateComment = createAsyncThunk(
-//   'comment/update',
-//   async (
-//     { commentId, newComment }: { commentId: number; newComment: Comment },
-//     { rejectWithValue }
-//   ) => {
-//     try {
-//       const response = await ApiRequest.update(commentId, newComment);
-//       console.log(response);
-//       // return response.data;
-//     } catch (err) {
-//       return rejectWithValue(err);
-//     }
-//   }
-// );
-
 const initialCommentState: CommentData = {
-  notifications: {
-    status: '',
-    message: '',
+  isEditing: false,
+  comment: {
+    profile_url: '',
+    author: '',
+    content: '',
+    createdAt: '',
   },
   commentList: [],
 };
@@ -83,28 +93,21 @@ const initialCommentState: CommentData = {
 export const commentSlice = createSlice({
   name: 'comment',
   initialState: initialCommentState,
-  reducers: {
-    // setComments: (state, action) => {
-    //   state.commentList = action.payload;
-    // },
-    // addComment: (state, action) => {
-    //   state.commentList.push(action.payload);
-    // },
-    // deleteComment: (state, action) => {
-    //   state.commentList = state.commentList.filter(
-    //     (comment) => comment.id !== action.payload
-    //   );
-    // },
-    // setNotifications: (state, action) => {
-    //   state.notifications = action.payload;
-    // },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchAllComments.fulfilled, (state, action) => {
       state.commentList = action.payload;
     });
+    builder.addCase(fetchComment.fulfilled, (state, action) => {
+      state.comment = action.payload;
+      state.isEditing = !state.isEditing;
+    });
     builder.addCase(createComment.fulfilled, (state, action) => {
       state.commentList.push(action.payload);
+    });
+    builder.addCase(updateComment.fulfilled, (state, action) => {
+      console.log(action.payload);
+      state.isEditing = !state.isEditing;
     });
     builder.addCase(deleteComment.fulfilled, (state, action) => {
       state.commentList = state.commentList.filter(
@@ -114,7 +117,8 @@ export const commentSlice = createSlice({
   },
 });
 
+export const editState = (state: RootState) => state.comment.isEditing;
+export const comment = (state: RootState) => state.comment.comment;
 export const list = (state: RootState) => state.comment.commentList;
-export const notification = (state: RootState) => state.comment.notifications;
 
 export const commentReducer = commentSlice.reducer;

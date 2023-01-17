@@ -1,42 +1,41 @@
-import { AsyncThunkAction, ThunkDispatch } from '@reduxjs/toolkit';
-import { ChangeEvent, DispatchWithoutAction, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent } from 'react';
 import styled from 'styled-components';
-import { createComment, fetchAllComments } from '../store/commentSlice';
-import { useAppDispatch } from '../store/configStore';
-
-type FormData = {
-  profile_url: string;
-  author: string;
-  content: string;
-  createdAt: string;
-};
+import useForm from '../hooks/useForm';
+import {
+  comment,
+  createComment,
+  fetchAllComments,
+  updateComment,
+} from '../store/commentSlice';
+import { useAppDispatch, useAppSelector } from '../store/configStore';
 
 const Form = () => {
-  const [formData, setFormData] = useState<FormData>({} as FormData);
-
   const dispatch = useAppDispatch();
+  const commentData = useAppSelector(comment);
+
+  const { formData, setForm, resetForm } = useForm();
 
   const setEnteredData = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
 
-    if (value.trim() === '') return;
-
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    setForm({ name, value });
   };
 
   const submitForm = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    dispatch(createComment(formData));
-    dispatch(fetchAllComments(1));
 
-    setFormData({
-      profile_url: '',
-      author: '',
-      content: '',
-      createdAt: '',
-    });
+    if (!commentData.id) {
+      dispatch(createComment(formData));
+    } else {
+      dispatch(
+        updateComment({ commentId: commentData.id, newComment: formData })
+      );
+    }
+
+    dispatch(fetchAllComments(1));
+    resetForm();
   };
 
   return (
