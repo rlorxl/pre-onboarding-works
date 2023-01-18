@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import styled from 'styled-components';
 import {
   deleteComment,
@@ -25,6 +26,10 @@ const CommentList = () => {
     dispatch(fetchComment(commentId));
     dispatch(fetchPage(currentPage));
   };
+
+  useEffect(() => {
+    dispatch(fetchPage(1));
+  }, []);
 
   return (
     <>
