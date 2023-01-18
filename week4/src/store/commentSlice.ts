@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import ApiRequest from '../api/api';
 import { Comment, CommentData } from '../types/comment-types';
 import { RootState } from './configStore';
@@ -83,18 +83,27 @@ export const commentSlice = createSlice({
   initialState: initialCommentState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(fetchPage.fulfilled, (state, action) => {
-      state.commentList = action.payload.data;
-      state.currentPage = action.payload.pageNum;
-    });
-    builder.addCase(fetchComment.fulfilled, (state, action) => {
-      state.comment = action.payload;
-      state.isEditing = true;
-    });
-    builder.addCase(createComment.fulfilled, (state, action) => {
-      state.commentList.push(action.payload);
-    });
-    builder.addCase(updateComment.fulfilled, (state, action) => {
+    builder.addCase(
+      fetchPage.fulfilled,
+      (state, action: PayloadAction<{ data: Comment[]; pageNum: number }>) => {
+        state.commentList = action.payload.data;
+        state.currentPage = action.payload.pageNum;
+      }
+    );
+    builder.addCase(
+      fetchComment.fulfilled,
+      (state, action: PayloadAction<Comment>) => {
+        state.comment = action.payload;
+        state.isEditing = true;
+      }
+    );
+    builder.addCase(
+      createComment.fulfilled,
+      (state, action: PayloadAction<Comment>) => {
+        state.commentList.push(action.payload);
+      }
+    );
+    builder.addCase(updateComment.fulfilled, (state) => {
       state.comment = {
         profile_url: '',
         author: '',

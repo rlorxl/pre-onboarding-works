@@ -13,14 +13,14 @@ const useForm = () => {
   const isEditing = useAppSelector(editState);
   const commentData = useAppSelector(comment);
 
-  const initialFormData = isEditing
-    ? commentData
-    : {
-        profile_url: '',
-        author: '',
-        content: '',
-        createdAt: '',
-      };
+  const initialValues = {
+    profile_url: '',
+    author: '',
+    content: '',
+    createdAt: '',
+  };
+
+  const initialFormData = isEditing ? commentData : initialValues;
 
   const [formData, setFormData] = useState<Comment>(initialFormData);
 
@@ -38,12 +38,7 @@ const useForm = () => {
   );
 
   const resetForm = (): void => {
-    setFormData({
-      profile_url: '',
-      author: '',
-      content: '',
-      createdAt: '',
-    });
+    setFormData(initialValues);
   };
 
   useEffect(() => {
