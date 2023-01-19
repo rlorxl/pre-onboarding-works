@@ -9,18 +9,18 @@ const CommentList = () => {
 
   const deleteCommentHandler = (commentId?: number) => {
     if (commentId === undefined) return;
-    dispatch(fetchCommentData({ type: 'DELETE', payload: commentId }));
-    dispatch(fetchCommentData({ type: 'GETPAGE', payload: 1 }));
+    dispatch(fetchCommentData('DELETE', commentId));
+    dispatch(fetchCommentData('GET_PAGE', 1));
   };
 
   const updateCommentHandler = async (commentId?: number) => {
     if (commentId === undefined) return;
-    dispatch(fetchCommentData({ type: 'GETONE', payload: commentId }));
+    dispatch(fetchCommentData('GETONE', commentId));
   };
 
   // initial fetch
   useEffect(() => {
-    dispatch(fetchCommentData({ type: 'GETPAGE', payload: 1 }));
+    dispatch(fetchCommentData('GETPAGE', 1));
   }, []);
 
   return (

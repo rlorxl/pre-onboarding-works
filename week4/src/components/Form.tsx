@@ -23,16 +23,16 @@ const Form = () => {
     e.preventDefault();
 
     if (!commentData.id) {
-      dispatch(fetchCommentData({ type: 'CREATE', payload: formData }));
-      dispatch(fetchCommentData({ type: 'GETPAGE', payload: 1 }));
+      dispatch(fetchCommentData('CREATE', formData));
+      dispatch(fetchCommentData('GETPAGE', 1));
     } else {
       dispatch(
-        fetchCommentData({
-          type: 'UPDATE',
-          payload: { commentId: commentData.id, newComment: formData },
+        fetchCommentData('UPDATE', {
+          commentId: commentData.id,
+          newComment: formData,
         })
       );
-      dispatch(fetchCommentData({ type: 'GETPAGE', payload: currentPage }));
+      dispatch(fetchCommentData('GETPAGE', currentPage));
     }
 
     resetForm();

@@ -1,55 +1,47 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
 import ApiRequest from '../api/api';
 import pageListArray from '../lib/page-list';
 import { Comment, CommentData } from '../types/comment-types';
 import { RootState } from './configStore';
 
-type UpdateConfig = {
-  commentId: number;
-  newComment: Comment;
-};
+type UpdateConfig = { commentId: number; newComment: Comment };
+type Payload = number | Comment | UpdateConfig | undefined;
 
-type FetchConfig = {
-  type: string;
-  payload?: any;
-};
+const GET_ALL = 'GETALL';
+const GET_PAGE = 'GETPAGE';
+const GET_ONE = 'GETONE';
+const CREATE = 'CREATE';
+const UPDATE = 'UPDATE';
+const DELETE = 'DELETE';
 
-export const fetchCommentData = (config: FetchConfig) => {
-  const { type, payload } = config;
-  return async (dispatch: any) => {
-    let res;
+export const fetchCommentData = (type: string, payload?: Payload) => {
+  return async (dispatch: Dispatch) => {
     try {
       switch (type) {
-        case 'GETALL': {
-          res = await ApiRequest.get();
-          dispatch(setPagenationList(res.data));
-          return;
+        case GET_ALL: {
+          const res = await ApiRequest.get();
+          return dispatch(setPagenationList(res.data));
         }
-        case 'GETPAGE': {
-          res = await ApiRequest.getPage(payload);
-          dispatch(setCommentList({ data: res.data, pageNum: payload }));
-          return;
+        case GET_PAGE: {
+          const res = await ApiRequest.getPage(payload as number);
+          return dispatch(setCommentList({ data: res.data, pageNum: payload }));
         }
-        case 'GETONE': {
-          res = await ApiRequest.getById(payload);
-          dispatch(setComment(res.data));
-          return;
+        case GET_ONE: {
+          const res = await ApiRequest.getById(payload as number);
+          return dispatch(setComment(res.data));
         }
-        case 'CREATE': {
-          res = await ApiRequest.create(payload);
-          dispatch(addComment(res.data));
-          return;
+        case CREATE: {
+          const res = await ApiRequest.create(payload as Comment);
+          return dispatch(addComment(res.data));
         }
-        case 'UPDATE': {
-          const { commentId, newComment } = payload;
-          res = await ApiRequest.update(commentId, newComment);
-          dispatch(updateComment(res.data));
-          return;
+        case UPDATE: {
+          const { commentId, newComment } = payload as UpdateConfig;
+          const res = await ApiRequest.update(commentId, newComment);
+          return dispatch(addComment(res.data));
         }
-        case 'DELETE': {
-          res = await ApiRequest.delete(payload);
-          dispatch(deleteComment(payload));
-          return;
+        case DELETE: {
+          ApiRequest.delete(payload as number);
+          return dispatch(deleteComment(payload as number));
         }
         default:
           break;
@@ -77,19 +69,24 @@ export const commentSlice = createSlice({
   name: 'comment',
   initialState: initialCommentState,
   reducers: {
-    setPagenationList: (state, action) => {
+    setPagenationList: (state, action: PayloadAction<Comment[]>) => {
       state.pagenationList = pageListArray(action.payload);
     },
-    setCommentList: (state, action) => {
+    setCommentList: (
+      state,
+      action: PayloadAction<{ data: Comment[]; pageNum: Payload }>
+    ) => {
       const { data, pageNum } = action.payload;
-      state.commentList = data;
-      state.currentPage = pageNum;
+      if (typeof pageNum === 'number') {
+        state.commentList = data;
+        state.currentPage = pageNum;
+      }
     },
-    setComment: (state, action) => {
+    setComment: (state, action: PayloadAction<Comment>) => {
       state.comment = action.payload;
       state.isEditing = true;
     },
-    addComment: (state, action) => {
+    addComment: (state, action: PayloadAction<Comment>) => {
       state.commentList.push(action.payload);
     },
     updateComment: (state) => {
@@ -101,7 +98,7 @@ export const commentSlice = createSlice({
       };
       state.isEditing = false;
     },
-    deleteComment: (state, action) => {
+    deleteComment: (state, action: PayloadAction<number>) => {
       state.commentList = state.commentList.filter(
         (comment) => comment.id !== action.payload
       );

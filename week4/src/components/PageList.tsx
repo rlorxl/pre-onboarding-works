@@ -14,12 +14,12 @@ const PageList = () => {
   const currentPage = useAppSelector(page);
   const pagenation = useAppSelector(pagenationList);
 
-  const pageNationHandler = (pageNm: number) => {
-    dispatch(fetchCommentData({ type: 'GETPAGE', payload: pageNm }));
+  const pageNationHandler = (pageNum: number) => {
+    dispatch(fetchCommentData('GETPAGE', pageNum));
   };
 
   useEffect(() => {
-    dispatch(fetchCommentData({ type: 'GETALL' }));
+    dispatch(fetchCommentData('GETALL'));
   }, [CommentList]);
 
   return (
