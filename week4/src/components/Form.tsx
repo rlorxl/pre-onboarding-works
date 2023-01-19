@@ -1,18 +1,11 @@
 import { ChangeEvent, FormEvent } from 'react';
 import styled from 'styled-components';
 import useForm from '../hooks/useForm';
-import {
-  comment,
-  createComment,
-  fetchPage,
-  page,
-  updateComment,
-} from '../store/commentSlice';
+import { comment, fetchCommentData, page } from '../store/commentSlice';
 import { useAppDispatch, useAppSelector } from '../store/configStore';
 
 const Form = () => {
   const dispatch = useAppDispatch();
-
   const commentData = useAppSelector(comment);
   const currentPage = useAppSelector(page);
 
@@ -30,14 +23,16 @@ const Form = () => {
     e.preventDefault();
 
     if (!commentData.id) {
-      console.log('first');
-      dispatch(createComment(formData));
-      dispatch(fetchPage(1));
+      dispatch(fetchCommentData({ type: 'CREATE', payload: formData }));
+      dispatch(fetchCommentData({ type: 'GETPAGE', payload: 1 }));
     } else {
       dispatch(
-        updateComment({ commentId: commentData.id, newComment: formData })
+        fetchCommentData({
+          type: 'UPDATE',
+          payload: { commentId: commentData.id, newComment: formData },
+        })
       );
-      dispatch(fetchPage(currentPage));
+      dispatch(fetchCommentData({ type: 'GETPAGE', payload: currentPage }));
     }
 
     resetForm();

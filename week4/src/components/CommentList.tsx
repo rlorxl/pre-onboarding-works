@@ -1,40 +1,32 @@
 import { useEffect } from 'react';
 import styled from 'styled-components';
-import {
-  deleteComment,
-  fetchComment,
-  fetchPage,
-  list,
-  page,
-} from '../store/commentSlice';
+import { fetchCommentData, list } from '../store/commentSlice';
 import { useAppDispatch, useAppSelector } from '../store/configStore';
 
 const CommentList = () => {
   const dispatch = useAppDispatch();
-
-  const commentList = useAppSelector(list);
-  const currentPage = useAppSelector(page);
+  const CommentList = useAppSelector(list);
 
   const deleteCommentHandler = (commentId?: number) => {
     if (commentId === undefined) return;
-    dispatch(deleteComment(commentId));
-    dispatch(fetchPage(1));
+    dispatch(fetchCommentData({ type: 'DELETE', payload: commentId }));
+    dispatch(fetchCommentData({ type: 'GETPAGE', payload: 1 }));
   };
 
   const updateCommentHandler = async (commentId?: number) => {
     if (commentId === undefined) return;
-    dispatch(fetchComment(commentId));
-    dispatch(fetchPage(currentPage));
+    dispatch(fetchCommentData({ type: 'GETONE', payload: commentId }));
   };
 
+  // initial fetch
   useEffect(() => {
-    dispatch(fetchPage(1));
+    dispatch(fetchCommentData({ type: 'GETPAGE', payload: 1 }));
   }, []);
 
   return (
     <>
-      {commentList.map((comment, key) => (
-        <Comment key={key}>
+      {CommentList.map((comment, key) => (
+        <CommentStyle key={key}>
           <img src={comment.profile_url} alt='' />
           {comment.author}
           <CreatedAt>{comment.createdAt}</CreatedAt>
@@ -44,13 +36,13 @@ const CommentList = () => {
             <a onClick={deleteCommentHandler.bind(null, comment.id)}>삭제</a>
           </Button>
           <hr />
-        </Comment>
+        </CommentStyle>
       ))}
     </>
   );
 };
 
-const Comment = styled.div`
+const CommentStyle = styled.div`
   padding: 7px 10px;
   text-align: left;
   & > img {

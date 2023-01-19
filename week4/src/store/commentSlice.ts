@@ -1,74 +1,67 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import ApiRequest from '../api/api';
+import pageListArray from '../lib/page-list';
 import { Comment, CommentData } from '../types/comment-types';
 import { RootState } from './configStore';
 
-export const fetchPage = createAsyncThunk(
-  'comment/fetchPage',
-  async (pageNum: number, { rejectWithValue }) => {
-    try {
-      const response = await ApiRequest.getPage(pageNum);
-      return { data: response.data, pageNum };
-    } catch (err) {
-      return rejectWithValue(err);
-    }
-  }
-);
+type UpdateConfig = {
+  commentId: number;
+  newComment: Comment;
+};
 
-export const fetchComment = createAsyncThunk(
-  'comment/fetchComment',
-  async (commentId: number, { rejectWithValue }) => {
-    try {
-      const response = await ApiRequest.getById(commentId);
-      return response.data;
-    } catch (err) {
-      return rejectWithValue(err);
-    }
-  }
-);
+type FetchConfig = {
+  type: string;
+  payload?: any;
+};
 
-export const createComment = createAsyncThunk(
-  'comment/create',
-  async (newComment: Comment, { rejectWithValue }) => {
+export const fetchCommentData = (config: FetchConfig) => {
+  const { type, payload } = config;
+  return async (dispatch: any) => {
+    let res;
     try {
-      const response = await ApiRequest.create(newComment);
-      return response.data;
+      switch (type) {
+        case 'GETALL': {
+          res = await ApiRequest.get();
+          dispatch(setPagenationList(res.data));
+          return;
+        }
+        case 'GETPAGE': {
+          res = await ApiRequest.getPage(payload);
+          dispatch(setCommentList({ data: res.data, pageNum: payload }));
+          return;
+        }
+        case 'GETONE': {
+          res = await ApiRequest.getById(payload);
+          dispatch(setComment(res.data));
+          return;
+        }
+        case 'CREATE': {
+          res = await ApiRequest.create(payload);
+          dispatch(addComment(res.data));
+          return;
+        }
+        case 'UPDATE': {
+          const { commentId, newComment } = payload;
+          res = await ApiRequest.update(commentId, newComment);
+          dispatch(updateComment(res.data));
+          return;
+        }
+        case 'DELETE': {
+          res = await ApiRequest.delete(payload);
+          dispatch(deleteComment(payload));
+          return;
+        }
+        default:
+          break;
+      }
     } catch (err) {
-      return rejectWithValue(err);
+      console.log(err);
     }
-  }
-);
-
-export const updateComment = createAsyncThunk(
-  'comment/update',
-  async (
-    { commentId, newComment }: { commentId: number; newComment: Comment },
-    { rejectWithValue }
-  ) => {
-    try {
-      const response = await ApiRequest.update(commentId, newComment);
-      return response.data;
-    } catch (err) {
-      return rejectWithValue(err);
-    }
-  }
-);
-
-export const deleteComment = createAsyncThunk(
-  'comment/delete',
-  async (commentId: number, { rejectWithValue }) => {
-    try {
-      await ApiRequest.delete(commentId);
-      return commentId;
-    } catch (err) {
-      return rejectWithValue(err);
-    }
-  }
-);
+  };
+};
 
 const initialCommentState: CommentData = {
   isEditing: false,
-  currentPage: 1,
   comment: {
     profile_url: '',
     author: '',
@@ -76,34 +69,30 @@ const initialCommentState: CommentData = {
     createdAt: '',
   },
   commentList: [],
+  pagenationList: [],
+  currentPage: 1,
 };
 
 export const commentSlice = createSlice({
   name: 'comment',
   initialState: initialCommentState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder.addCase(
-      fetchPage.fulfilled,
-      (state, action: PayloadAction<{ data: Comment[]; pageNum: number }>) => {
-        state.commentList = action.payload.data;
-        state.currentPage = action.payload.pageNum;
-      }
-    );
-    builder.addCase(
-      fetchComment.fulfilled,
-      (state, action: PayloadAction<Comment>) => {
-        state.comment = action.payload;
-        state.isEditing = true;
-      }
-    );
-    builder.addCase(
-      createComment.fulfilled,
-      (state, action: PayloadAction<Comment>) => {
-        state.commentList.push(action.payload);
-      }
-    );
-    builder.addCase(updateComment.fulfilled, (state) => {
+  reducers: {
+    setPagenationList: (state, action) => {
+      state.pagenationList = pageListArray(action.payload);
+    },
+    setCommentList: (state, action) => {
+      const { data, pageNum } = action.payload;
+      state.commentList = data;
+      state.currentPage = pageNum;
+    },
+    setComment: (state, action) => {
+      state.comment = action.payload;
+      state.isEditing = true;
+    },
+    addComment: (state, action) => {
+      state.commentList.push(action.payload);
+    },
+    updateComment: (state) => {
       state.comment = {
         profile_url: '',
         author: '',
@@ -111,13 +100,29 @@ export const commentSlice = createSlice({
         createdAt: '',
       };
       state.isEditing = false;
-    });
+    },
+    deleteComment: (state, action) => {
+      state.commentList = state.commentList.filter(
+        (comment) => comment.id !== action.payload
+      );
+    },
   },
 });
+
+export const {
+  setPagenationList,
+  setCommentList,
+  setComment,
+  addComment,
+  updateComment,
+  deleteComment,
+} = commentSlice.actions;
 
 export const editState = (state: RootState) => state.comment.isEditing;
 export const page = (state: RootState) => state.comment.currentPage;
 export const comment = (state: RootState) => state.comment.comment;
 export const list = (state: RootState) => state.comment.commentList;
+export const pagenationList = (state: RootState) =>
+  state.comment.pagenationList;
 
 export const commentReducer = commentSlice.reducer;

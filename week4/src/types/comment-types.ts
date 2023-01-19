@@ -11,4 +11,5 @@ export type CommentData = {
   currentPage: number;
   comment: Comment;
   commentList: Comment[];
+  pagenationList?: number[];
 };

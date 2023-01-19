@@ -1,48 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import styled from 'styled-components';
-import ApiRequest from '../api/api';
-import { fetchPage, page } from '../store/commentSlice';
+import {
+  fetchCommentData,
+  list,
+  page,
+  pagenationList,
+} from '../store/commentSlice';
 import { useAppDispatch, useAppSelector } from '../store/configStore';
 
-const LIMIT = 4;
-
 const PageList = () => {
-  const [pageArray, setPageArray] = useState<number[]>([]);
-
   const dispatch = useAppDispatch();
-
+  const CommentList = useAppSelector(list);
   const currentPage = useAppSelector(page);
+  const pagenation = useAppSelector(pagenationList);
 
   const pageNationHandler = (pageNm: number) => {
-    dispatch(fetchPage(pageNm));
+    dispatch(fetchCommentData({ type: 'GETPAGE', payload: pageNm }));
   };
 
   useEffect(() => {
-    const fetchAllComments = async () => {
-      const response = await ApiRequest.get();
-
-      const pageCount = Math.ceil(response.data.length / LIMIT);
-
-      const newPageArray = Array(pageCount)
-        .fill(0)
-        .map((_, idx) => idx + 1);
-
-      setPageArray(newPageArray);
-    };
-    fetchAllComments();
-  }, []);
+    dispatch(fetchCommentData({ type: 'GETALL' }));
+  }, [CommentList]);
 
   return (
     <PageListStyle>
-      {pageArray.map((pageNm) => (
-        <Page
-          active={currentPage === pageNm}
-          key={pageNm}
-          onClick={pageNationHandler.bind(null, pageNm)}
-        >
-          {pageNm}
-        </Page>
-      ))}
+      {pagenation &&
+        pagenation.map((pageNm) => (
+          <Page
+            active={currentPage === pageNm}
+            key={pageNm}
+            onClick={pageNationHandler.bind(null, pageNm)}
+          >
+            {pageNm}
+          </Page>
+        ))}
     </PageListStyle>
   );
 };
